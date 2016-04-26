@@ -9,7 +9,7 @@ public class RunAway : MonoBehaviour {
 	private float walkSpeed = 2.0f;
 	private bool jumpActive=false;
 	Vector3 basePosition;
-	float jumpSpeed = 1f;
+	public float jumpSpeed = 1f;
 	Vector3 fearObjectPos;
 
 

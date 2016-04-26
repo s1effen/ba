@@ -6,10 +6,11 @@ public class hit : MonoBehaviour {
 	public GameObject container;
 	public GameObject kopf;
 	public int move = 0;
+	/*
 	Vector3 targetup;
 	Vector3 targetdown;
 	Vector3 originPos;
-
+	*/
 
 	// Use this for initialization
 	void Start () {
@@ -20,6 +21,7 @@ public class hit : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		/*
 		move = 0;
 
 		if (move == 1) { //up
@@ -39,10 +41,12 @@ public class hit : MonoBehaviour {
 			else{
 				move = 0;
 			}
-		}
+
+		}*/
 	}
 
 	void hitbegin(){
+		/*
 		originPos = container.transform.position;
 		RaycastHit hit;
 		Collider collider;
@@ -53,6 +57,7 @@ public class hit : MonoBehaviour {
 			//targetdown = transform.position + Vector3.up * 0.1f;
 		}
 		targetup = transform.position + Vector3.up * 0.1f;
+		*/
 		move = 1;
 		//Move Hammer up a bit.
 	}
