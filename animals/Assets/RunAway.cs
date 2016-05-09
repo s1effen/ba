@@ -6,43 +6,68 @@ public class RunAway : MonoBehaviour {
 	public GameObject fearObject;
 	private Hammer hammer; 
 	private Animator anim;
-	private float walkSpeed = 2.0f;
 	private bool jumpActive=false;
 	Vector3 basePosition;
-	public float jumpSpeed = 1f;
+	Vector3 baseForward;
+	public float speed = 1f;
+	public float up = 0f;
 	Vector3 fearObjectPos;
-
+	public bool selfAnimated;
+	Manager manager;
 
 
 	// Use this for initialization
 	void Start () {
-		//fearObjectTransform = new Transform();
+		manager = GameObject.Find ("GameManager").GetComponent<Manager> ();
+		fearObject = GameObject.Find ("Hammer");
 		hammer = fearObject.GetComponentInParent<Hammer> ();
 		anim = GetComponent<Animator> ();
+		up = 0;
 	}
 	
 	// Update is called once per frame
 	void Update () {
 	
 		//Jump if hammer is hit
-		if (hammer.hit || Input.GetKeyDown(KeyCode.Space))
+		if (hammer.hit)
 		{
 			//turn away from object
 			fearObjectPos = new Vector3(fearObject.transform.position.x,transform.position.y,fearObject.transform.position.z);
-			transform.LookAt (fearObjectPos);
-			transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x,transform.rotation.eulerAngles.y -180,transform.rotation.eulerAngles.z);
+			if (!selfAnimated) {
+				transform.LookAt (fearObjectPos);
+				transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x,transform.rotation.eulerAngles.y -180,transform.rotation.eulerAngles.z);
+			}
 
 			//Jump
 			anim.SetTrigger("Jump");
+			if(Random.Range(-1,3)>0)
+				if(GetComponent<AudioSource> () != null)
+					GetComponent<AudioSource> ().Play ();
+			hammer.hit = false;
 		}
 
 		if (jumpActive)
 		{
 			//Move up
-			transform.position = basePosition + Vector3.up * anim.GetFloat("Up");
+			if (selfAnimated) {
+				//rotate
+				transform.Rotate(100 * Time.deltaTime,0,0);
 
-			//Move Forward
-			basePosition += transform.forward * jumpSpeed * Time.deltaTime;
+				//Jump up
+				transform.position = basePosition + Vector3.up * up * 2;
+
+				//Move Forward
+				basePosition += baseForward * speed * Time.deltaTime;
+
+			} else {
+				//Jump up
+				transform.position = basePosition + Vector3.up * anim.GetFloat ("Up");
+
+				//Move Forward
+				basePosition += transform.forward * speed * Time.deltaTime;
+			}
+
+
 		}
 
 	}
@@ -51,15 +76,25 @@ public class RunAway : MonoBehaviour {
 	void JumpStart()
 	{
 		basePosition = transform.position;
+		if (selfAnimated) {
+			baseForward = transform.position - fearObjectPos;
+			baseForward.Normalize ();
+
+		}
 		jumpActive = true;
-		Debug.Log ("Jump started");
 	}
 
 	//Called by Animation at current Screen
 	void JumpEnd()
 	{
 		jumpActive = false;
-		Debug.Log ("Jump ended");
 	}
 
+	void OnTriggerEnter(Collider other) {
+		if (other.gameObject.Equals (fearObject)) {
+			manager.hitAnimal ();
+		} else {
+			manager.hitSomething (other.gameObject);
+		}
+	}
 }

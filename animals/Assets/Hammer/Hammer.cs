@@ -5,44 +5,60 @@ public class Hammer : MonoBehaviour {
 
 	public GameObject rotateAround;
 	public GameObject hammer;
+	public GameObject kopf;
+	public GameObject tisch;
+	public HammerAnim hammerAnim;
 	public bool mouseControl = true;
 	public float mouseSpeed = 0.05f;
 	public float yDistanceToTableForHit = 0.01f;
 	public float yDistanceToTableForNoHit = 0.5f;
 	public float yDistanceToTable;
-	public bool hit;
+	public bool hit = false;
 	public bool hitEnabled = false;
+	public Manager manager;
 	private bool calibrated = false;
+	private Vector3 target;
+	private float baseHeight;
+	private float offsetY;
 
 	private Animator anim;
 	public float yBase;
+
 	// Use this for initialization
 	void Start () {
+		manager = GameObject.Find ("GameManager").GetComponent<Manager> ();
+		Renderer kopfRend = hammer.transform.FindChild ("Kopf").GetComponent<Renderer>();
+		offsetY = kopfRend.bounds.size.y / 2;
+		baseHeight = transform.position.y;
 		anim = hammer.GetComponent<Animator> ();
-		yBase = hammer.transform.position.y;
-		hitEnabled = false;
+		if (!mouseControl) {
+			yBase = hammer.transform.position.y;
+			hitEnabled = false;
+		} else {
+			hitEnabled = true;
+		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if (manager.activeMessageBox ())
+			return;
+		
 		movement ();
 
 		if (calibrated && (yDistanceToTable > yDistanceToTableForNoHit))
 			hitEnabled = true;
 		
-		hit = hitObject();
+		hitObject();
 		yDistanceToTable = Mathf.Abs (hammer.transform.position.y - yBase);
-
 		//Calibrate Hammer to table
 		if (Input.GetKeyDown ("c")) {
 			yBase = hammer.transform.position.y;
 			RaycastHit hitPoint;
 			if (Physics.Raycast (hammer.transform.position, -Vector3.up, out hitPoint, 20)) {
-				Renderer kopfRend = hammer.transform.FindChild ("Kopf").GetComponent<Renderer>();
-				float offsetY = kopfRend.bounds.size.y / 2 + hitPoint.point.y;
-				Debug.Log ("Hammer calibrated to " + offsetY);
-				hammer.transform.position = new Vector3(hammer.transform.position.x,offsetY,hammer.transform.position.z);
-				yBase = offsetY;
+				Debug.Log ("Hammer calibrated to " + (hitPoint.point.y + offsetY));
+				hammer.transform.position = new Vector3(hammer.transform.position.x,hitPoint.point.y + offsetY,hammer.transform.position.z);
+				yBase = hitPoint.point.y + offsetY;
 				yDistanceToTable = Mathf.Abs (hammer.transform.position.y - yBase);
 				calibrated = true;
 			}
@@ -51,25 +67,54 @@ public class Hammer : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.E))
 			hitEnabled = !hitEnabled;
 		
-
+		switch (hammerAnim.move) {
+		case 4:
+			if ((transform.position.y - baseHeight) < 0) {
+				transform.position = Vector3.MoveTowards (transform.position, new Vector3 (transform.position.x, baseHeight + offsetY, transform.position.z), 0.5f * Time.deltaTime);
+			} else {
+				hammerAnim.move = 0;
+			}
+			break;
+		case 2:
+			transform.position = Vector3.MoveTowards (transform.position, new Vector3 (transform.position.x, target.y + offsetY, transform.position.z), 0.3f * Time.deltaTime);
+			break;
+		case 3:
+			hit = true;
+			manager.hit(target);
+			hammerAnim.move = 4;
+			break;
+		default:
+			hit = false;
+			break;
+		}
 
 	}
 
 	bool hitObject()
 	{
-		if (!hitEnabled)
+		if (!mouseControl && !hitEnabled)
 			return false;
 		if ((!mouseControl && (yDistanceToTable < yDistanceToTableForHit)) || mouseControl && Input.GetMouseButtonDown (0))
 		{
-			//anim.SetTrigger("hit");
-			Debug.Log("hiiiiit");
-			hitEnabled = false;
-			return true;
+			RaycastHit hitPoint;
+			if (Physics.Raycast (kopf.transform.position, -Vector3.up, out hitPoint, 20)) {
+				//Only hits that hit the table area are valid
+				if (hitPoint.collider.gameObject.Equals (tisch)) {
+					target = hitPoint.point;
+					anim.SetTrigger("hit");
+					hitEnabled = false;
+					return true;					
+				}
+			}
+
 		}
 		return false;
 	}
 
-
+	public void touchedObject(GameObject touched)
+	{
+		Debug.Log("Touched " + touched.name);
+	}
 
 	void movement()
 	{
