@@ -106,13 +106,20 @@ public class Hammer : MonoBehaviour {
 			return false;
 		if ((!mouseControl && (yDistanceToTable < yDistanceToTableForHit)) || mouseControl && Input.GetMouseButtonDown (0))
 		{
+            Debug.Log("Hit versuch");
 			RaycastHit hitPoint;
 			if (Physics.Raycast (kopf.transform.position, -Vector3.up, out hitPoint, 20)) {
 				//Only hits that hit the table area are valid
 				if (hitPoint.collider.gameObject.Equals (tisch)) {
 					target = hitPoint.point;
 					anim.SetTrigger("hit");
-					hitEnabled = false;
+                    if (!mouseControl) {
+                        hit = true;
+                        manager.hit(target);
+                        hammerAnim.move = 4;
+                    }
+                    
+                    hitEnabled = false;
 					return true;					
 				}
 			}

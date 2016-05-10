@@ -29,7 +29,9 @@ public class Manager : MonoBehaviour {
 	public GameObject[] boxes;
 	public GameObject hammerContainerPC;
 	public GameObject hammerContainerVR;
-	private Hammer hammer;
+    public GameObject cameraPC;
+    public GameObject cameraVR;
+    private Hammer hammer;
 	private GameObject activeAnimal;
 	private int activeBox = -1;
 	private bool hitPointAnimation;
@@ -45,13 +47,19 @@ public class Manager : MonoBehaviour {
 		case Mode.PC:
 			if (hammerContainerPC != null) {
 				hammer = hammerContainerPC.GetComponent<Hammer> ();
-			}
-			break;
+            }
+                hammerContainerVR.SetActive(false);
+                cameraVR.SetActive(false);
+                cameraPC.SetActive(true);
+                break;
 		case Mode.VR:
 			if(hammerContainerVR!=null){
 				hammer = hammerContainerVR.GetComponent<Hammer> ();
 			}
-			break;
+                hammerContainerPC.SetActive(false);
+                cameraPC.SetActive(false);
+                cameraVR.SetActive(true);
+                break;
 		}
 
 		changeState (state);
@@ -74,7 +82,11 @@ public class Manager : MonoBehaviour {
 		}
 	}
 
-	void spaceInState(){
+    public GameObject getHammer(){
+        return hammer.transform.GetChild(0).FindChild("Kopf").gameObject;
+        }
+
+    void spaceInState(){
 		switch(state){
 		case State.INIT:
 			viewManager.hideInfoText ();
