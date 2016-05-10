@@ -8,7 +8,7 @@ public class ViewManager : MonoBehaviour {
 	public Text pointText;
 	public Text hitText;
 	public GameObject canvas;
-	public GameObject hitPointText;
+	public GameObject hitPointTextPrefab;
 	public GameObject infoCanvas;
 	public GameObject subCanvas;
 	public Color hitsColor;
@@ -51,7 +51,7 @@ public class ViewManager : MonoBehaviour {
 
 	public void showHitPoints()
 	{
-		hitPointText.gameObject.SetActive(true);
+		pointText.gameObject.SetActive(true);
 	}
 
 	public void setPoints(int value)
@@ -70,7 +70,7 @@ public class ViewManager : MonoBehaviour {
 
 	public void setGoalPoints(int value)
 	{
-		setHitPoints (value, goalPointsColor, 0);
+		setHitPoints (value, goalPointsColor, 1);
 	}
 
 	public void setHitPoints(int value)
@@ -79,13 +79,14 @@ public class ViewManager : MonoBehaviour {
 	}
 	public void setHitPoints(int value, Color color, int speed)
 	{
-		if (!hitPointText.gameObject.activeSelf)
-			hitPointText.gameObject.SetActive (true);
-		GameObject hitPoint = Instantiate (hitPointText);
-		Text points = hitPointText.GetComponent<Text> ();
+		GameObject hitPoint = Instantiate (hitPointTextPrefab);
+		Text points = hitPoint.GetComponent<Text> ();
 		hitPoint.GetComponent<HitPointText> ().speed = speed;
 		points.color = color;
-		points.text = "+ " + value.ToString ();
+		string prefix = "+ ";
+		if (value < 0)
+			prefix = "";
+		points.text = prefix + value.ToString ();
 		hitPoint.transform.SetParent (canvas.transform);
 		hitPoint.SetActive (true);
 	}

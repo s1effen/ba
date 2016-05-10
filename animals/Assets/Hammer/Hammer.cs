@@ -15,17 +15,21 @@ public class Hammer : MonoBehaviour {
 	public float yDistanceToTable;
 	public bool hit = false;
 	public bool hitEnabled = false;
-	public Manager manager;
+	private Manager manager;
 	private bool calibrated = false;
 	private Vector3 target;
 	private float baseHeight;
 	private float offsetY;
+	Vector3 initPosition;
+	Quaternion initRotation;
 
 	private Animator anim;
 	public float yBase;
 
 	// Use this for initialization
 	void Start () {
+		initPosition = transform.position;
+		initRotation = transform.rotation;
 		manager = GameObject.Find ("GameManager").GetComponent<Manager> ();
 		Renderer kopfRend = hammer.transform.FindChild ("Kopf").GetComponent<Renderer>();
 		offsetY = kopfRend.bounds.size.y / 2;
@@ -89,6 +93,12 @@ public class Hammer : MonoBehaviour {
 		}
 
 	}
+
+	public void reset(){
+		transform.position = initPosition;
+		transform.rotation = initRotation;
+	}
+
 
 	bool hitObject()
 	{

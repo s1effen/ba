@@ -10,7 +10,10 @@ public class Manager : MonoBehaviour {
 		CONDITION_INSECT,
 		CONDITION_INSECT_DEATH,
 		CONDITION_REPTILE,
-		CONDITION_MAMMAL
+		CONDITION_REPTILE_DEATH,
+		CONDITION_MAMMAL,
+		CONDITION_MAMMAL_DEATH,
+		FINAL
 	};
 	public State state = State.INIT;
 
@@ -26,26 +29,29 @@ public class Manager : MonoBehaviour {
 	public GameObject[] boxes;
 	public GameObject hammerContainerPC;
 	public GameObject hammerContainerVR;
-	private int activeAnimalPrefab = -1;
+	private Hammer hammer;
 	private GameObject activeAnimal;
 	private int activeBox = -1;
 	private bool hitPointAnimation;
 	private bool stateChangable = false;
-	private Transform hammerContainerPCInitTransform;
-	private Transform hammerContainerVRInitTransform;
+	private bool pointsCollectible = true;
+	public int conditonLoops = 1;
+	public int conditionLoopCount = 1;
 
 	// Use this for initialization
 	void Start () {
 		viewManager = GameObject.Find("ViewManager").GetComponent<ViewManager> ();
-
-		if (hammerContainerPC != null) {
-			hammerContainerPCInitTransform = hammerContainerPC.transform;
-			hammerContainerPC.SetActive (false);
-		}
-
-		if (hammerContainerVR != null) {
-			hammerContainerVRInitTransform = hammerContainerVR.transform;
-			hammerContainerVR.SetActive (false);
+		switch (mode) {
+		case Mode.PC:
+			if (hammerContainerPC != null) {
+				hammer = hammerContainerPC.GetComponent<Hammer> ();
+			}
+			break;
+		case Mode.VR:
+			if(hammerContainerVR!=null){
+				hammer = hammerContainerVR.GetComponent<Hammer> ();
+			}
+			break;
 		}
 
 		changeState (state);
@@ -53,9 +59,15 @@ public class Manager : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetKeyDown (KeyCode.Space)) {
+		if (Input.GetKeyDown(KeyCode.Space)) {
 			if (stateChangable) {
-				changeState (state + 1);
+				if (conditionLoopCount == conditonLoops) {
+					conditionLoopCount = 1;
+					changeState (state + 1);
+				}else{
+					conditionLoopCount++;
+					changeState (state);
+				}
 			} else {
 				spaceInState ();
 			}
@@ -67,89 +79,90 @@ public class Manager : MonoBehaviour {
 		case State.INIT:
 			viewManager.hideInfoText ();
 			viewManager.setSubText ("Press <Space> to begin training round");
+			conditionLoopCount = conditonLoops;
 			stateChangable = true;
 			break;
 		case State.TRAINING:
 			viewManager.hideInfoText ();
 			viewManager.setSubText ("Press <Space> to end training round and begin experiment");
+			conditionLoopCount = conditonLoops;
 			stateChangable = true;
-			break;
-		case State.CONDITION_MAMMAL:
 			break;
 		case State.CONDITION_INSECT:
 		case State.CONDITION_INSECT_DEATH:
 			viewManager.hideAllMessages();
 			break;
 		case State.CONDITION_REPTILE:
+		case State.CONDITION_REPTILE_DEATH:
+			viewManager.hideAllMessages();
+			break;
+		case State.CONDITION_MAMMAL:
+		case State.CONDITION_MAMMAL_DEATH:
+			viewManager.hideAllMessages();
 			break;
 		}
 	}
 	void changeState(State newState){
-
 		state = newState;
 
 		switch(state){
 		case State.INIT:
 			resetCounter ();
+			initHammer ();
 			viewManager.setInfoText ("Please move the hammer to get in touch with controls.\n\n Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec volutpat, est feugiat rutrum cursus, felis ante porttitor nisl, eget dapibus velit dolor id eros. Donec ac libero nisl. Morbi lorem orci, efficitur pulvinar scelerisque et, vestibulum a diam. Aliquam erat volutpat. ");
 			viewManager.setSubText ("Press <Space> to start");
 			stateChangable = false;
 			break;
 		case State.TRAINING:
 			resetCounter ();
-			viewManager.setInfoText ("Please move the ball into the boxes.");
+			initHammer ();
+			viewManager.setInfoText ("Please move the ball into the box.");
 			viewManager.setSubText ("Press <Space> to begin");
 			activateRandomBox ();
 			activateAnimal (0);
 			stateChangable = false;
 			initHammer ();
 			break;
-		case State.CONDITION_MAMMAL:
-			break;
 		case State.CONDITION_INSECT:
-			resetCounter ();
-			initHammer ();
-			viewManager.setInfoText ("Please move the spider into the boxes.");
-			viewManager.setSubText ("Press <Space> to begin");
-			activateRandomBox ();
-			activateAnimal (1);
-			stateChangable = false;
-
-			break;
 		case State.CONDITION_INSECT_DEATH:
 			resetCounter ();
 			initHammer ();
-			viewManager.setInfoText ("Please move the spider into the boxes.");
+			viewManager.setInfoText ("Please move the spider into the box.");
 			viewManager.setSubText ("Press <Space> to begin");
 			activateRandomBox ();
 			activateAnimal (1);
 			stateChangable = false;
-
 			break;
 		case State.CONDITION_REPTILE:
+		case State.CONDITION_REPTILE_DEATH:
+			resetCounter ();
+			initHammer ();
+			viewManager.setInfoText ("Please move the gecko into the box.");
+			viewManager.setSubText ("Press <Space> to begin");
+			activateRandomBox ();
+			activateAnimal (2);
+			stateChangable = false;
+			break;
+		case State.CONDITION_MAMMAL:
+		case State.CONDITION_MAMMAL_DEATH:
+			resetCounter ();
+			initHammer ();
+			viewManager.setInfoText ("Please move the cat into the box.");
+			viewManager.setSubText ("Press <Space> to begin");
+			activateRandomBox ();
+			activateAnimal (3);
+			stateChangable = false;
+			break;
+		case State.FINAL:
+			viewManager.hideAllMessages ();
+			viewManager.setInfoText ("Thank you for participating.");
+			stateChangable = false;
 			break;
 		}
 	}
 
 	void initHammer(){
-		switch (mode) {
-		case Mode.PC:
-			if (hammerContainerPC != null) {
-				hammerContainerPC.SetActive (false);
-				hammerContainerPC.transform.position = hammerContainerPCInitTransform.position;
-				hammerContainerPC.transform.rotation = hammerContainerPCInitTransform.rotation;
-				hammerContainerPC.SetActive (true);
-			}
-			break;
-		case Mode.VR:
-			if(hammerContainerVR!=null){
-				hammerContainerVR.SetActive (false);
-				hammerContainerVR.transform.position = hammerContainerVRInitTransform.position;
-				hammerContainerVR.transform.rotation = hammerContainerVRInitTransform.rotation;
-				hammerContainerVR.SetActive (true);				
-			}
-			break;
-		}
+		hammer.reset ();
 	}
 
 	private void addHit(){
@@ -161,10 +174,11 @@ public class Manager : MonoBehaviour {
 	}
 
 	void resetCounter(){
-		points = 0;
+		points = 100;
 		hits = 0;
 		viewManager.setPoints (points);
 		viewManager.setHits (hits);
+		pointsCollectible = true;
 	}
 
 	void resetState(){
@@ -172,10 +186,7 @@ public class Manager : MonoBehaviour {
 		case State.TRAINING:
 			activateRandomBox ();
 			activateAnimal (0);
-			points = 0;
-			viewManager.setPoints (points);
-			hits = 0;
-			viewManager.setHits (hits);
+			resetCounter ();
 			stateChangable = false;
 			break;
 		case State.CONDITION_MAMMAL:
@@ -187,26 +198,7 @@ public class Manager : MonoBehaviour {
 		}
 	}
 
-	public void hit(Vector3 target){
-		switch(state){
-		case State.TRAINING:
-			addHit ();
-			addPointsBasedOnDistance (target);
-			break;
-		case State.CONDITION_MAMMAL:
-			break;
-		case State.CONDITION_INSECT:
-			addHit ();
-			addPointsBasedOnDistance (target);
-			break;
-		case State.CONDITION_INSECT_DEATH:
-			addHit ();
-			addPointsBasedOnDistance (target);
-			break;
-		case State.CONDITION_REPTILE:
-			break;
-		}
-	}
+
 	public void activateRandomBox(){
 		deactivateBoxes ();
 		activeBox =  (int)Mathf.Round (Random.Range(0,boxes.Length));
@@ -220,12 +212,16 @@ public class Manager : MonoBehaviour {
 	}
 
 	public void addGoalPoints(int add){
+		if (!pointsCollectible)
+			return;
 		viewManager.setGoalPoints (add); 
 		points += add;
 		viewManager.setPoints(points);
 	}
 
 	public void addHitPoints(int add){
+		if (!pointsCollectible)
+			return;
 		viewManager.setHitPoints (add); 
 		points += add;
 		viewManager.setPoints (points);
@@ -241,8 +237,7 @@ public class Manager : MonoBehaviour {
 	public void activateAnimal(int anim){
 		if (activeAnimal != null)
 			Destroy (activeAnimal);
-		activeAnimalPrefab = anim;
-		activeAnimal = Instantiate (animals [activeAnimalPrefab]);
+		activeAnimal = Instantiate (animals [anim]);
 		activeAnimal.transform.SetParent(GameObject.Find ("Animals").transform);
 		activeAnimal.transform.localPosition = Vector3.zero;
 		activeAnimal.SetActive(true);
@@ -254,22 +249,55 @@ public class Manager : MonoBehaviour {
 	}
 
 
+	public void hit(Vector3 target){
+		switch(state){
+		case State.INIT:
+			addHit ();
+			addHitPoints (-10);
+			break;
+		case State.TRAINING:
+			addHit ();
+			addHitPoints (-10);
+			break;
+		case State.CONDITION_INSECT:
+		case State.CONDITION_INSECT_DEATH:
+			addHit ();
+			addHitPoints (-10);
+			break;
+		case State.CONDITION_REPTILE:
+		case State.CONDITION_REPTILE_DEATH:
+			addHit ();
+			addHitPoints (-10);
+			break;
+		case State.CONDITION_MAMMAL:
+		case State.CONDITION_MAMMAL_DEATH:
+			addHit ();
+			addHitPoints (-10);
+			break;
+		}
+	}
 
 	public void hitAnimal(){
 		switch(state){
 		case State.TRAINING:
 			break;
-		case State.CONDITION_MAMMAL:
-			break;
 		case State.CONDITION_INSECT:
-			Destroy (activeAnimal);
-			changeStateInSeconds (2);
-			break;
-		case State.CONDITION_INSECT_DEATH:
-			activeAnimal.GetComponent<Animator> ().SetTrigger ("Die");
-			changeStateInSeconds (5);
-			break;
 		case State.CONDITION_REPTILE:
+		case State.CONDITION_MAMMAL:
+			Destroy (activeAnimal);
+			addHitPoints (-30);
+			pointsCollectible = false;
+			viewManager.setSubText ("Press <Space> for next round");
+			stateChangable = true;
+			break;
+		case State.CONDITION_REPTILE_DEATH:
+		case State.CONDITION_INSECT_DEATH:
+		case State.CONDITION_MAMMAL_DEATH:
+			activeAnimal.GetComponent<Animator> ().SetTrigger ("Die");
+			addHitPoints(-30);
+			pointsCollectible = false;
+			viewManager.setSubText ("Press <Space> for next round");
+			stateChangable = true;
 			break;
 		}
 	}
@@ -282,7 +310,7 @@ public class Manager : MonoBehaviour {
 		switch(state){
 		case State.TRAINING:
 			if (other.name == "Trigger") {
-				addGoalPoints (50);
+				addGoalPoints (30);
 				viewManager.setInfoText ("Congratulations. The object entered the box.");
 				activeAnimal.GetComponent<Rigidbody>().useGravity = false;
 			}
@@ -291,14 +319,24 @@ public class Manager : MonoBehaviour {
 				resetStateInSeconds (2);
 				viewManager.setInfoText ("It fell off the Table. Please move the ball into the boxes.");
 				viewManager.setSubText ("Press <Space> to play again");
+				stateChangable = false;
 			}
 			break;
 		case State.CONDITION_MAMMAL:
-			break;
 		case State.CONDITION_INSECT:
-
-			break;
 		case State.CONDITION_REPTILE:
+		case State.CONDITION_REPTILE_DEATH:
+		case State.CONDITION_INSECT_DEATH:
+		case State.CONDITION_MAMMAL_DEATH:
+			if (other.name == "Trigger") {
+				addGoalPoints (30);
+				viewManager.setInfoText ("Congratulations. The object entered the box.");
+			}
+
+			if (other.name == "Floor") {
+				viewManager.setSubText ("Press <Space> for next round");
+				stateChangable = true;
+			}
 			break;
 		}
 	}
