@@ -4,7 +4,7 @@ using System.Collections;
 public class RunAway : MonoBehaviour {
 
 	public GameObject fearObject;
-	public Hammer hammer; 
+	public Hammer hammer;
 	private Animator anim;
 	private bool jumpActive=false;
 	Vector3 basePosition;
@@ -29,9 +29,8 @@ public class RunAway : MonoBehaviour {
 	void Update () {
 	
 		//Jump if hammer is hit
-		if (hammer.hit)
+		if (hammer.hit && !manager.dead)
 		{
-            Debug.Log("Jump");
 			//turn away from object
 			fearObjectPos = new Vector3(fearObject.transform.position.x,transform.position.y,fearObject.transform.position.z);
 			if (!selfAnimated) {
@@ -88,6 +87,7 @@ public class RunAway : MonoBehaviour {
 	//Called by Animation at current Screen
 	void JumpEnd()
 	{
+		Debug.Log ("Jump end");
 		jumpActive = false;
 	}
 

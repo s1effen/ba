@@ -1,0 +1,14 @@
+Participant:abc
+Mode:PC
+----------------------------------------
+Trial:1
+Start Time:06/07/2016 13:36:06
+name;position;rotation;scale
+End Time:06/07/2016 13:36:09
+--------------------------------------------------------------------------------
+Condition:INIT
+Start Time:06/07/2016 13:36:09
+Trials:1
+ResetHitCounter;06/07/2016 13:36:09;100;0
+ResetHammer;06/07/2016 13:36:09;(-5.8, 0.5, -1.0)
+UserEntry;06/07/2016 13:36:11;Space

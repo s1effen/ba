@@ -1,0 +1,211 @@
+fileFormatVersion: 2
+guid: 638cf9c034bed489a85cb1f893df8c61
+timeCreated: 1465287628
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: BellyVolume
+    100002: ChestVolume
+    100004: Head
+    100006: Hips
+    100008: Jaw
+    100010: kitt_Body1
+    100012: kitt_Cornea1
+    100014: kitt_Hair1
+    100016: kitt_LeftEyeBall
+    100018: kitt_RightEyeBall
+    100020: kitt_Tongue
+    100022: //RootNode
+    100024: kittenGeo1
+    100026: kittenRoot
+    100028: LeftArm
+    100030: LeftCheek
+    100032: LeftEar1
+    100034: LeftEar2
+    100036: LeftEye
+    100038: LeftEyeBottomLid
+    100040: LeftEyeUpperLid
+    100042: LeftFingerBase
+    100044: LeftFoot
+    100046: LeftFootIndex1
+    100048: LeftForeArm
+    100050: LeftHand
+    100052: LeftHeadVolume
+    100054: LeftLeg
+    100056: LeftShoulder
+    100058: LeftToeBase
+    100060: LeftUpLeg
+    100062: Neck
+    100064: RightArm
+    100066: RightCheek
+    100068: RightEar1
+    100070: RightEar2
+    100072: RightEye
+    100074: RightEyeBottomLid
+    100076: RightEyeUpperLid
+    100078: RightFingerBase
+    100080: RightFoot
+    100082: RightFootIndex1
+    100084: RightForeArm
+    100086: RightHand
+    100088: RightHeadVolume
+    100090: RightLeg
+    100092: RightShoulder
+    100094: RightToeBase
+    100096: RightUpLeg
+    100098: Spine
+    100100: Spine1
+    100102: Spine2
+    100104: Spine3
+    100106: Tail1
+    100108: Tail2
+    100110: Tail3
+    100112: Tail4
+    100114: Tail5
+    100116: Tail6
+    100118: Tontue
+    100120: Tontue1
+    100122: Tontue2
+    100124: TopHeadVolume
+    400000: BellyVolume
+    400002: ChestVolume
+    400004: Head
+    400006: Hips
+    400008: Jaw
+    400010: kitt_Body1
+    400012: kitt_Cornea1
+    400014: kitt_Hair1
+    400016: kitt_LeftEyeBall
+    400018: kitt_RightEyeBall
+    400020: kitt_Tongue
+    400022: //RootNode
+    400024: kittenGeo1
+    400026: kittenRoot
+    400028: LeftArm
+    400030: LeftCheek
+    400032: LeftEar1
+    400034: LeftEar2
+    400036: LeftEye
+    400038: LeftEyeBottomLid
+    400040: LeftEyeUpperLid
+    400042: LeftFingerBase
+    400044: LeftFoot
+    400046: LeftFootIndex1
+    400048: LeftForeArm
+    400050: LeftHand
+    400052: LeftHeadVolume
+    400054: LeftLeg
+    400056: LeftShoulder
+    400058: LeftToeBase
+    400060: LeftUpLeg
+    400062: Neck
+    400064: RightArm
+    400066: RightCheek
+    400068: RightEar1
+    400070: RightEar2
+    400072: RightEye
+    400074: RightEyeBottomLid
+    400076: RightEyeUpperLid
+    400078: RightFingerBase
+    400080: RightFoot
+    400082: RightFootIndex1
+    400084: RightForeArm
+    400086: RightHand
+    400088: RightHeadVolume
+    400090: RightLeg
+    400092: RightShoulder
+    400094: RightToeBase
+    400096: RightUpLeg
+    400098: Spine
+    400100: Spine1
+    400102: Spine2
+    400104: Spine3
+    400106: Tail1
+    400108: Tail2
+    400110: Tail3
+    400112: Tail4
+    400114: Tail5
+    400116: Tail6
+    400118: Tontue
+    400120: Tontue1
+    400122: Tontue2
+    400124: TopHeadVolume
+    4300000: kitt_Body1
+    4300002: kitt_Tongue
+    4300004: kitt_Hair1
+    4300006: kitt_Cornea1
+    4300008: kitt_LeftEyeBall
+    4300010: kitt_RightEyeBall
+    7400000: Take 001
+    9500000: //RootNode
+    13700000: kitt_Body1
+    13700002: kitt_Cornea1
+    13700004: kitt_Hair1
+    13700006: kitt_LeftEyeBall
+    13700008: kitt_RightEyeBall
+    13700010: kitt_Tongue
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 0
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -3,7 +3,7 @@ guid: eea149ea526e1b84b8910aff4088a973
 timeCreated: 1427121039
 licenseType: Store
 ModelImporter:
-  serializedVersion: 18
+  serializedVersion: 19
   fileIDToRecycleName:
     100000: BellyVolume
     100002: ChestVolume
@@ -127,6 +127,7 @@ ModelImporter:
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
+    resampleRotations: 1
     optimizeGameObjects: 0
     motionNodeName: 
     animationImportErrors: 
@@ -134,9 +135,9 @@ ModelImporter:
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     animationCompression: 0
-    animationRotationError: .5
-    animationPositionError: .5
-    animationScaleError: .5
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
     animationWrapMode: 0
     extraExposedTransformPaths: []
     clipAnimations:
@@ -150,6 +151,7 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
+      hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
@@ -168,21 +170,21 @@ ModelImporter:
           curve:
           - time: 0
             value: 0
-            inSlope: -.00385683565
-            outSlope: -.00385683565
+            inSlope: -0.0038568357
+            outSlope: -0.0038568357
             tangentMode: 0
-          - time: .1884422
-            value: -4.4349581e-05
+          - time: 0.1884422
+            value: -0.00004434958
             inSlope: 0
             outSlope: 0
             tangentMode: 0
-          - time: .419597983
-            value: .0497986786
+          - time: 0.41959798
+            value: 0.04979868
             inSlope: 0
             outSlope: 0
             tangentMode: 0
-          - time: .665117383
-            value: -6.98193908e-05
+          - time: 0.6651174
+            value: -0.00006981939
             inSlope: 0
             outSlope: 0
             tangentMode: 0
@@ -193,15 +195,16 @@ ModelImporter:
             tangentMode: 0
           preInfinity: 2
           postInfinity: 2
+          rotationOrder: 4
       events:
-      - time: .190954775
+      - time: 0.19095477
         functionName: JumpStart
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: .665829122
+      - time: 0.6658291
         functionName: JumpEnd
         data: 
         objectReferenceParameter: {instanceID: 0}
@@ -323,6 +326,7 @@ ModelImporter:
         weight: 1
       maskType: 0
       maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
     isReadable: 1
   meshes:
     lODScreenPercentages: []
@@ -343,20 +347,19 @@ ModelImporter:
     useFileScale: 1
   tangentSpace:
     normalSmoothAngle: 60
-    splitTangentsAcrossUV: 1
     normalImportMode: 0
-    tangentImportMode: 1
+    tangentImportMode: 4
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
     human: []
     skeleton: []
-    armTwist: .5
-    foreArmTwist: .5
-    upperLegTwist: .5
-    legTwist: .5
-    armStretch: .0500000007
-    legStretch: .0500000007
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
     feetSpacing: 0
     rootMotionBoneName: kittenRoot
     hasTranslationDoF: 0

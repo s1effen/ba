@@ -11,11 +11,12 @@ public class ViewManager : MonoBehaviour {
 	public GameObject hitPointTextPrefab;
 	public GameObject infoCanvas;
 	public GameObject subCanvas;
+	public GameObject inputCanvas;
 	public Color hitsColor;
 	public Color hitPointsColor;
 	public Color goalPointsColor;
-
 	private bool hitPointAnimation;
+	private System.EventHandler handler;
 
 	// Use this for initialization
 	void Start () {
@@ -35,6 +36,7 @@ public class ViewManager : MonoBehaviour {
 	}
 
 	public void hideAllMessages(){
+		hideCanvas (inputCanvas);
 		hideCanvas(infoCanvas);
 		hideCanvas(subCanvas);
 	}
@@ -104,6 +106,28 @@ public class ViewManager : MonoBehaviour {
 		setText (subCanvas, text);
 	}
 
+	//------- User Input
+
+	public void getTextInput(string placeholder,System.EventHandler textHandler){
+		if (!inputCanvas.activeSelf)
+			inputCanvas.SetActive (true);
+		setText (inputCanvas, placeholder);
+		handler = textHandler;
+	}
+
+	public void textInput(InputField field){
+		InputEventArgs args = new InputEventArgs();
+		args.input = field.text;
+		handler.Invoke (this, args);
+	}
+		
+	public class InputEventArgs : System.EventArgs
+	{
+		public string input { get; set; }
+	}
+
+	//------- User Input
+
 	void hideCanvas(GameObject canvas){
 		canvas.SetActive(false);
 	}
@@ -115,4 +139,5 @@ public class ViewManager : MonoBehaviour {
 		if(!panel.activeSelf)
 			panel.SetActive(true);
 	}
+
 }

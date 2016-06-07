@@ -15,6 +15,7 @@ public class Hammer : MonoBehaviour {
 	public float yDistanceToTable;
 	public bool hit = false;
 	public bool hitEnabled = false;
+	private bool freezed = false;
 	private Manager manager;
 	private bool calibrated = false;
 	private Vector3 target;
@@ -67,9 +68,6 @@ public class Hammer : MonoBehaviour {
 				calibrated = true;
 			}
 		}
-
-		if (Input.GetKeyDown (KeyCode.E))
-			hitEnabled = !hitEnabled;
 		
 		switch (hammerAnim.move) {
 		case 4:
@@ -83,6 +81,8 @@ public class Hammer : MonoBehaviour {
 			transform.position = Vector3.MoveTowards (transform.position, new Vector3 (transform.position.x, target.y + offsetY, transform.position.z), 0.3f * Time.deltaTime);
 			break;
 		case 3:
+			if (GetComponent<AudioSource> ())
+				GetComponent<AudioSource> ().Play ();
 			hit = true;
 			manager.hit(target);
 			hammerAnim.move = 4;
@@ -94,19 +94,36 @@ public class Hammer : MonoBehaviour {
 
 	}
 
-	public void reset(){
+	public void freeze(){
+		hitEnabled = false;
+		freezed = true;
+	}
+
+	public void deactivate (){
+		hammer.SetActive (false);
+		hitEnabled = false;
+	}
+
+	public void activate(){
+		hammer.SetActive (true);
+		hitEnabled = true;
+		freezed = false;
+	}
+
+	public Vector3 reset(){
+		activate ();
 		transform.position = initPosition;
 		transform.rotation = initRotation;
+		return initPosition;
 	}
 
 
 	bool hitObject()
 	{
-		if (!mouseControl && !hitEnabled)
+		if (freezed || (!mouseControl && !hitEnabled))
 			return false;
 		if ((!mouseControl && (yDistanceToTable < yDistanceToTableForHit)) || mouseControl && Input.GetMouseButtonDown (0))
 		{
-            Debug.Log("Hit versuch");
 			RaycastHit hitPoint;
 			if (Physics.Raycast (kopf.transform.position, -Vector3.up, out hitPoint, 20)) {
 				//Only hits that hit the table area are valid
