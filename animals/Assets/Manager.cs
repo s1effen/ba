@@ -4,13 +4,16 @@ using System.Collections;
 
 public class Manager : MonoBehaviour {
 
-	public enum State{
-		SETUP,
-		INIT,
-		TRAINING,
-		CONDITION_INSECT,
-		CONDITION_INSECT_DEATH,
-		CONDITION_INSECT_KILL,
+	/*
+	Enum for different Conditions
+	*/
+	public enum Condition{
+		SETUP,						//User input for participant id
+		INIT,						//User can get handy with controls
+		TRAINING,					//User can do training with a ball
+		CONDITION_INSECT,			//User should bring insect to box. When hit, insect disappears.
+		CONDITION_INSECT_DEATH,		//User should bring insect to box. When hit, insect dies.
+		CONDITION_INSECT_KILL,		//User should kill insect. When hit, insect dies.
 		CONDITION_REPTILE,
 		CONDITION_REPTILE_DEATH,
 		CONDITION_REPTILE_KILL,
@@ -19,13 +22,16 @@ public class Manager : MonoBehaviour {
 		CONDITION_MAMMAL_KILL,
 		FINAL
 	};
-	public State state = State.SETUP;
+	public Condition condition = Condition.SETUP;
 
-	public enum Mode{
+	/*
+	Enum for different Groups (Desktop or VR)
+	*/
+	public enum Group{
 		PC,
 		VR
 	};
-	public Mode mode;
+	public Group group;
 	private ViewManager viewManager;
 	public int points = 0;
 	public int hits = 0;
@@ -44,20 +50,28 @@ public class Manager : MonoBehaviour {
 	private Logger logger;
 	private int activeBox = -1;
 	private bool hitPointAnimation;
-	private bool stateChangable = false;
+	private bool conditionChangable = false;
 	private bool pointsCollectible = true;
 	public int conditonLoops = 1;
 	public int conditionLoopCount = 1;
 	private bool spaceEnabled = true;
 	public bool dead = false;
+	Vector3 animalLastPos = Vector3.zero;
 
 	// Use this for initialization
 	void Start () {
+
 		viewManager = GameObject.Find("ViewManager").GetComponent<ViewManager> ();
+
+		//Initialize logger
 		logger = new Logger ();
-		logger.write("Mode:" + mode.ToString());
-		switch (mode) {
-		case Mode.PC:
+		logger.write("Group:" + group.ToString());
+
+		/*
+			Initialize setup based on group
+		*/
+		switch (group) {
+		case Group.PC:
 			if (hammerContainerPC != null) {
 				hammer = hammerContainerPC.GetComponent<Hammer> ();
 			}
@@ -67,7 +81,7 @@ public class Manager : MonoBehaviour {
             cameraVR.SetActive(false);
             cameraPC.SetActive(true);
             break;
-		case Mode.VR:
+		case Group.VR:
 			if(hammerContainerVR!=null){
 				hammer = hammerContainerVR.GetComponent<Hammer> ();
 			}
@@ -79,61 +93,87 @@ public class Manager : MonoBehaviour {
             break;
 		}
 
-		changeState (state);
+		//start initial condition
+		changeCondition (condition);
 	}
 
 	// Update is called once per frame
 	void Update () {
+
+		//Quit application when pressed Q
+		if (Input.GetKeyDown(KeyCode.Q)){
+			changeCondition (Condition.FINAL);
+		}
+			
+		/*
+			react to user input via space key to toggle conditions or hide messages
+		*/
 		if (spaceEnabled && Input.GetKeyDown(KeyCode.Space)) {
 			logger.logUserEntry ("Space");
-			if (stateChangable) {
+
+			/*
+			 if condition should have more than one trial, activate other trial, otherwise next condition.
+			*/
+			if (conditionChangable) {
 				if (conditionLoopCount == conditonLoops) {
 					conditionLoopCount = 1;
-					changeState (state + 1);
+					changeCondition (condition + 1);
 				}else{
 					conditionLoopCount++;
-					changeState (state);
+					changeCondition (condition);
 				}
 			} else {
-				spaceInState ();
+				spaceInCondition (); //just to hide user messages
 			}
 		}
 	}
 
+	//Get Hammer Gameobject
     public GameObject getHammer(){
         return hammer.transform.GetChild(0).FindChild("Kopf").gameObject;
     }
 		
-
+	//Gets Event from user input field
 	public void userInputSetup(object sender, System.EventArgs e)
 	{
 		ViewManager.InputEventArgs ie = (ViewManager.InputEventArgs)e;
-		logger.init(ie.input);
-		changeState (state +1);
+		logger.init(ie.input, group);
+		changeCondition (condition +1);
 	}
 
-	void changeState(State newState){
-		if (!newState.Equals (state)) {
-			logger.endCondition (state.ToString ());
-			logger.beginCondition (newState.ToString (),conditonLoops);
-		} else {
-			logger.beginTrial (state.ToString (), conditionLoopCount);
+	/*
+	Changes condition to new condition or loads next trial of the same condition.
+	All necessary steps are done for initialisation like reset counter, change animal etc.
+	*/
+	void changeCondition(Condition newCondition){
+
+		/*
+		Logging. Only inactive in Setup or Final condition.
+		*/
+		if (newCondition != Condition.SETUP && newCondition != Condition.FINAL) {
+			if (!newCondition.Equals (condition)) {
+				logger.endCondition (condition.ToString ());
+				logger.beginCondition (newCondition, conditonLoops);
+			} else {
+				logger.beginTrial (condition, conditonLoops,conditionLoopCount);
+			}
 		}
-		state = newState;
-		switch(state){
-		case State.SETUP:
+
+		condition = newCondition;
+		switch(condition){
+		case Condition.SETUP:
 			deactivateHammer ();
 			viewManager.getTextInput ("Participant ID",userInputSetup);
 			break;
-		case State.INIT:
+		case Condition.INIT:
 			resetCounter ();
 			initHammer ();
 			viewManager.hideAllMessages ();
-			viewManager.setInfoText ("Please move the hammer to get in touch with controls.\n\n");
+			viewManager.setInfoText ("Please move the hammer to get in touch with controls. The experiment can be aborted at any time by pressing 'q' or telling the Assistant.\n\n");
 			viewManager.setSubText ("Press <Space> to start");
-			stateChangable = false;
+			conditionChangable = false;
 			break;
-		case State.TRAINING:
+		case Condition.TRAINING:
 			resetCounter ();
 			initHammer ();
 			viewManager.hideAllMessages ();
@@ -141,10 +181,10 @@ public class Manager : MonoBehaviour {
 			viewManager.setSubText ("Press <Space> to begin");
 			activateRandomBox ();
 			activateAnimal (0);
-			stateChangable = false;
+			conditionChangable = false;
 			break;
-		case State.CONDITION_INSECT:
-		case State.CONDITION_INSECT_DEATH:
+		case Condition.CONDITION_INSECT:
+		case Condition.CONDITION_INSECT_DEATH:
 			resetCounter ();
 			initHammer ();
 			viewManager.hideAllMessages ();
@@ -152,9 +192,9 @@ public class Manager : MonoBehaviour {
 			viewManager.setSubText ("Press <Space> to begin");
 			activateRandomBox ();
 			activateAnimal (1);
-			stateChangable = false;
+			conditionChangable = false;
 			break;
-		case State.CONDITION_INSECT_KILL:
+		case Condition.CONDITION_INSECT_KILL:
 			resetCounter ();
 			initHammer ();
 			viewManager.hideAllMessages ();
@@ -162,10 +202,10 @@ public class Manager : MonoBehaviour {
 			viewManager.setSubText ("Press <Space> to begin");
 			deactivateBoxes ();
 			activateAnimal (1);
-			stateChangable = false;
+			conditionChangable = false;
 			break;
-		case State.CONDITION_REPTILE:
-		case State.CONDITION_REPTILE_DEATH:
+		case Condition.CONDITION_REPTILE:
+		case Condition.CONDITION_REPTILE_DEATH:
 			resetCounter ();
 			initHammer ();
 			viewManager.hideAllMessages ();
@@ -173,9 +213,9 @@ public class Manager : MonoBehaviour {
 			viewManager.setSubText ("Press <Space> to begin");
 			activateRandomBox ();
 			activateAnimal (2);
-			stateChangable = false;
+			conditionChangable = false;
 			break;
-		case State.CONDITION_REPTILE_KILL:
+		case Condition.CONDITION_REPTILE_KILL:
 			resetCounter ();
 			initHammer ();
 			viewManager.hideAllMessages ();
@@ -183,10 +223,10 @@ public class Manager : MonoBehaviour {
 			viewManager.setSubText ("Press <Space> to begin");
 			deactivateBoxes ();
 			activateAnimal (2);
-			stateChangable = false;
+			conditionChangable = false;
 			break;
-		case State.CONDITION_MAMMAL:
-		case State.CONDITION_MAMMAL_DEATH:
+		case Condition.CONDITION_MAMMAL:
+		case Condition.CONDITION_MAMMAL_DEATH:
 			resetCounter ();
 			initHammer ();
 			viewManager.hideAllMessages ();
@@ -194,9 +234,9 @@ public class Manager : MonoBehaviour {
 			viewManager.setSubText ("Press <Space> to begin");
 			activateRandomBox ();
 			activateAnimal (3);
-			stateChangable = false;
+			conditionChangable = false;
 			break;
-		case State.CONDITION_MAMMAL_KILL:
+		case Condition.CONDITION_MAMMAL_KILL:
 			resetCounter ();
 			initHammer ();
 			viewManager.hideAllMessages ();
@@ -204,48 +244,50 @@ public class Manager : MonoBehaviour {
 			viewManager.setSubText ("Press <Space> to begin");
 			deactivateBoxes ();
 			activateAnimal (3);
-			stateChangable = false;
+			conditionChangable = false;
 			break;
-		case State.FINAL:
+		case Condition.FINAL:
 			viewManager.hideAllMessages ();
 			deactivateHammer ();
-			viewManager.setInfoText ("Thank you for participating.");
-			viewManager.setSubText ("Press <Space> to end game");
-			stateChangable = false;
+			destroyAnimal ();
+			activateAllAnimals ();
+			logger.appendSummary ();
+			viewManager.setSubText ("Thank you for participating. Press <Space>");
+			conditionChangable = false;
 			break;
 		}
 	}
 
-    void spaceInState(){
-		switch(state){
-		case State.INIT:
+    void spaceInCondition(){
+		switch(condition){
+		case Condition.INIT:
 			viewManager.hideInfoText ();
 			viewManager.setSubText ("Press <Space> to begin training round");
 			conditionLoopCount = conditonLoops;
-			stateChangable = true;
+			conditionChangable = true;
 			break;
-		case State.TRAINING:
+		case Condition.TRAINING:
 			viewManager.hideInfoText ();
 			viewManager.setSubText ("Press <Space> to end training round and begin experiment");
 			conditionLoopCount = conditonLoops;
-			stateChangable = true;
+			conditionChangable = true;
 			break;
-		case State.CONDITION_INSECT:
-		case State.CONDITION_INSECT_DEATH:
-		case State.CONDITION_INSECT_KILL:
+		case Condition.CONDITION_INSECT:
+		case Condition.CONDITION_INSECT_DEATH:
+		case Condition.CONDITION_INSECT_KILL:
 			viewManager.hideAllMessages();
 			break;
-		case State.CONDITION_REPTILE:
-		case State.CONDITION_REPTILE_DEATH:
-		case State.CONDITION_REPTILE_KILL:
+		case Condition.CONDITION_REPTILE:
+		case Condition.CONDITION_REPTILE_DEATH:
+		case Condition.CONDITION_REPTILE_KILL:
 			viewManager.hideAllMessages();
 			break;
-		case State.CONDITION_MAMMAL:
-		case State.CONDITION_MAMMAL_DEATH:
-		case State.CONDITION_MAMMAL_KILL:
+		case Condition.CONDITION_MAMMAL:
+		case Condition.CONDITION_MAMMAL_DEATH:
+		case Condition.CONDITION_MAMMAL_KILL:
 			viewManager.hideAllMessages();
 			break;
-		case State.FINAL:
+		case Condition.FINAL:
 			Application.Quit();
 			break;
 		}
@@ -272,9 +314,9 @@ public class Manager : MonoBehaviour {
 	private void addHit(Vector3 target){
 		hits++;
 		if (activeAnimal) {
-			logger.logHit (target,activeAnimal.transform.position,hits);
+			logger.logHit (condition,conditonLoops,conditionLoopCount,target,activeAnimal.transform.position,hits);
 		} else {
-			logger.logHit (target,hits);
+			logger.logHit (condition,conditonLoops,conditionLoopCount,target,animalLastPos,hits);
 		}
 		viewManager.setHits (hits);
 	}
@@ -292,19 +334,19 @@ public class Manager : MonoBehaviour {
 		pointsCollectible = true;
 	}
 
-	void resetState(){
-		switch(state){
-		case State.TRAINING:
+	void resetCondition(){
+		switch(condition){
+		case Condition.TRAINING:
 			activateRandomBox ();
 			activateAnimal (0);
 			resetCounter ();
-			stateChangable = false;
+			conditionChangable = false;
 			break;
-		case State.CONDITION_MAMMAL:
+		case Condition.CONDITION_MAMMAL:
 			break;
-		case State.CONDITION_INSECT:
+		case Condition.CONDITION_INSECT:
 			break;
-		case State.CONDITION_REPTILE:
+		case Condition.CONDITION_REPTILE:
 			break;
 		}
 	}
@@ -319,6 +361,7 @@ public class Manager : MonoBehaviour {
 		}
 
 	}
+		
 
 	public void deactivateBoxes(){
 		foreach (GameObject box in boxes)
@@ -326,7 +369,6 @@ public class Manager : MonoBehaviour {
 	}
 
 	public void addGoalPoints(int add){
-		logger.logEnteredGoal ();
 		if (!pointsCollectible)
 			return;
 		viewManager.setGoalPoints (add); 
@@ -357,8 +399,18 @@ public class Manager : MonoBehaviour {
 		activeAnimal = Instantiate (animals [anim]);
 		activeAnimal.transform.SetParent(GameObject.Find ("Animals").transform);
 		activeAnimal.transform.localPosition = Vector3.zero;
+		animalLastPos = Vector3.zero;
 		activeAnimal.SetActive(true);
 
+	}
+
+	public void activateAllAnimals (){
+		for (int i=0;i < animals.Length;i++) {
+			GameObject animTemp = Instantiate (animals[i]);
+			animTemp.transform.SetParent(GameObject.Find ("Animals").transform);
+			animTemp.transform.localPosition = Vector3.left * 0.2f * (animals.Length -1)/2 + Vector3.right * 0.2f * i;
+			animTemp.SetActive(true);
+		}
 	}
 
 	public GameObject getActiveAnimal(){
@@ -367,32 +419,32 @@ public class Manager : MonoBehaviour {
 
 
 	public void hit(Vector3 target){
-		switch(state){
-		case State.INIT:
+		switch(condition){
+		case Condition.INIT:
 			addHit (target);
 			addHitPoints (-10);
 			break;
-		case State.TRAINING:
+		case Condition.TRAINING:
 			addHit (target);
 			addHitPoints (-10);
 			break;
-		case State.CONDITION_INSECT:
-		case State.CONDITION_INSECT_DEATH:
-		case State.CONDITION_INSECT_KILL:
+		case Condition.CONDITION_INSECT:
+		case Condition.CONDITION_INSECT_DEATH:
+		case Condition.CONDITION_INSECT_KILL:
 			addHit (target);
 			if (!dead)
 				addHitPoints (-10);
 			break;
-		case State.CONDITION_REPTILE:
-		case State.CONDITION_REPTILE_DEATH:
-		case State.CONDITION_REPTILE_KILL:
+		case Condition.CONDITION_REPTILE:
+		case Condition.CONDITION_REPTILE_DEATH:
+		case Condition.CONDITION_REPTILE_KILL:
 			addHit (target);
 			if (!dead)
 				addHitPoints (-10);
 			break;
-		case State.CONDITION_MAMMAL:
-		case State.CONDITION_MAMMAL_DEATH:
-		case State.CONDITION_MAMMAL_KILL:
+		case Condition.CONDITION_MAMMAL:
+		case Condition.CONDITION_MAMMAL_DEATH:
+		case Condition.CONDITION_MAMMAL_KILL:
 			addHit (target);
 			if (!dead)
 				addHitPoints (-10);
@@ -401,57 +453,61 @@ public class Manager : MonoBehaviour {
 	}
 
 	public void hitAnimal(){
-		switch(state){
-		case State.TRAINING:
+		switch(condition){
+		case Condition.TRAINING:
 			break;
-		case State.CONDITION_INSECT:
-		case State.CONDITION_REPTILE:
-		case State.CONDITION_MAMMAL:
+		case Condition.CONDITION_INSECT:
+		case Condition.CONDITION_REPTILE:
+		case Condition.CONDITION_MAMMAL:
 			destroyAnimal ();
 			freezeHammer ();
 			addHitPoints (-30);
 			pointsCollectible = false;
+			logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Disappear");
 			showBothTextInSeconds(2,"Congratulations.","Press <Space> for next round");
-			stateChangable = true;
+			conditionChangable = true;
 			break;
-		case State.CONDITION_REPTILE_DEATH:
-		case State.CONDITION_INSECT_DEATH:
-		case State.CONDITION_MAMMAL_DEATH:
+		case Condition.CONDITION_REPTILE_DEATH:
+		case Condition.CONDITION_INSECT_DEATH:
+		case Condition.CONDITION_MAMMAL_DEATH:
 			if (dead)
 				return;
 			killAnimal ();
 			freezeHammer ();
 			addHitPoints(-30);
 			pointsCollectible = false;
+			logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Kill");
 			showBothTextInSeconds(2,"Congratulations.","Press <Space> for next round");
-			stateChangable = true;
+			conditionChangable = true;
 			break;
-		case State.CONDITION_REPTILE_KILL:
-		case State.CONDITION_INSECT_KILL:
-		case State.CONDITION_MAMMAL_KILL:
+		case Condition.CONDITION_REPTILE_KILL:
+		case Condition.CONDITION_INSECT_KILL:
+		case Condition.CONDITION_MAMMAL_KILL:
 			if (dead)
 				return;
 			killAnimal ();
 			freezeHammer();
 			addGoalPoints (50);
+			logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Kill");
 			showBothTextInSeconds(2,"Congratulations. You killed the Animal.","Press <Space> for next round");
-			stateChangable = true;
+			conditionChangable = true;
 			break;
 		}
 	}
 
 	public void destroyAnimal(){
 		logger.logDestroyAnimal (activeAnimal.name);
+		animalLastPos = activeAnimal.transform.position;
 		Destroy (activeAnimal);
 	}
 
 	public void killAnimal(){
 		dead = true;
 		activeAnimal.GetComponent<Animator> ().SetTrigger ("Die");
-		switch (state) {
-		case State.CONDITION_MAMMAL:
-		case State.CONDITION_MAMMAL_DEATH:
-		case State.CONDITION_MAMMAL_KILL:
+		switch (condition) {
+		case Condition.CONDITION_MAMMAL:
+		case Condition.CONDITION_MAMMAL_DEATH:
+		case Condition.CONDITION_MAMMAL_KILL:
 			BoxCollider bc = activeAnimal.GetComponent<BoxCollider> ();
 			bc.center -= new Vector3 (0, 0.02f, 0);
 			bc.size -= new Vector3 (0, 0.12f, 0);
@@ -473,44 +529,57 @@ public class Manager : MonoBehaviour {
 
 		if (other.name == "Kopf")
 			hitAnimal ();
-		switch(state){
-		case State.TRAINING:
+		switch(condition){
+		case Condition.TRAINING:
 			if (other.name == "Trigger") {
 				addGoalPoints (30);
+				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Box");
 				viewManager.setInfoText ("Congratulations. It entered the box.");
 				activeAnimal.GetComponent<Rigidbody>().useGravity = false;
 			}
 
 			if (other.name == "Floor" || other.name == "outside") {
-				resetStateInSeconds (2);
+				resetConditionInSeconds (2);
+				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Floor");
 				viewManager.setInfoText ("It fell off the Table. Please move the ball into the boxes.");
 				viewManager.setSubText ("Press <Space> to play again");
-				stateChangable = false;
+				conditionChangable = false;
 			}
 			break;
-		case State.CONDITION_MAMMAL:
-		case State.CONDITION_INSECT:
-		case State.CONDITION_REPTILE:
-		case State.CONDITION_REPTILE_DEATH:
-		case State.CONDITION_INSECT_DEATH:
-		case State.CONDITION_MAMMAL_DEATH:
-		case State.CONDITION_REPTILE_KILL:
-		case State.CONDITION_INSECT_KILL:
-		case State.CONDITION_MAMMAL_KILL:
+		case Condition.CONDITION_MAMMAL:
+		case Condition.CONDITION_INSECT:
+		case Condition.CONDITION_REPTILE:
+		case Condition.CONDITION_REPTILE_DEATH:
+		case Condition.CONDITION_INSECT_DEATH:
+		case Condition.CONDITION_MAMMAL_DEATH:
 			if (other.name == "Trigger") {
 				addGoalPoints (30);
+				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Box");
 				viewManager.setInfoText ("Congratulations. It entered the box.");
 				viewManager.setSubText ("Press <Space> for next round");
-				stateChangable = true;
+				conditionChangable = true;
 
 			}
 
 			if (other.name == "Floor" || other.name == "outside") {
 				logger.logOffTable (activeAnimal.transform.position);
 				Destroy (activeAnimal);
+				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Floor");
 				viewManager.setInfoText ("It fell off the Table.");
 				viewManager.setSubText ("Press <Space> for next round");
-				stateChangable = true;
+				conditionChangable = true;
+			}
+			break;
+		case Condition.CONDITION_REPTILE_KILL:
+		case Condition.CONDITION_INSECT_KILL:
+		case Condition.CONDITION_MAMMAL_KILL:
+			if (other.name == "Floor" || other.name == "outside") {
+				logger.logOffTable (activeAnimal.transform.position);
+				Destroy (activeAnimal);
+				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Floor");
+				viewManager.setInfoText ("Congratulations.");
+				viewManager.setSubText ("Press <Space> for next round");
+				conditionChangable = true;
 			}
 			break;
 		}
@@ -541,24 +610,24 @@ public class Manager : MonoBehaviour {
 		spaceEnabled = true;
 	}
 
-	void changeStateInSeconds(int seconds){
-		StartCoroutine (IEchangeStateInSeconds (seconds));
+	void changeConditionInSeconds(int seconds){
+		StartCoroutine (IEchangeConditionInSeconds (seconds));
 
 	}
 
-	IEnumerator IEchangeStateInSeconds(int seconds) {
+	IEnumerator IEchangeConditionInSeconds(int seconds) {
 		yield return new WaitForSeconds(seconds);
-		changeState (state + 1);
+		changeCondition (condition + 1);
 	}
 
-	void resetStateInSeconds(int seconds){
-			StartCoroutine (IEresetStateInSeconds (seconds));
+	void resetConditionInSeconds(int seconds){
+			StartCoroutine (IEresetConditionInSeconds (seconds));
 
 	}
 
-	IEnumerator IEresetStateInSeconds(int seconds) {
+	IEnumerator IEresetConditionInSeconds(int seconds) {
 		yield return new WaitForSeconds(seconds);
-		resetState ();
+		resetCondition ();
 	}
 
 	void OnApplicationQuit() {
