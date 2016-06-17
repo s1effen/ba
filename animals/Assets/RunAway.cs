@@ -87,7 +87,6 @@ public class RunAway : MonoBehaviour {
 	//Called by Animation at current Screen
 	void JumpEnd()
 	{
-		Debug.Log ("Jump end");
 		jumpActive = false;
 	}
 

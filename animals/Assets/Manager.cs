@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.VR;
 
 
 public class Manager : MonoBehaviour {
@@ -35,6 +36,8 @@ public class Manager : MonoBehaviour {
 	private ViewManager viewManager;
 	public int points = 0;
 	public int hits = 0;
+	int hitstotal;
+	int pointstotal;
 	public GameObject[] animals;
 	public GameObject[] boxes;
 	public GameObject hammerContainerPC;
@@ -56,6 +59,7 @@ public class Manager : MonoBehaviour {
 	public int conditionLoopCount = 1;
 	private bool spaceEnabled = true;
 	public bool dead = false;
+	public StartArea startArea;
 	Vector3 animalLastPos = Vector3.zero;
 
 	// Use this for initialization
@@ -70,26 +74,30 @@ public class Manager : MonoBehaviour {
 		/*
 			Initialize setup based on group
 		*/
+		viewManager.mode (group);
 		switch (group) {
 		case Group.PC:
 			if (hammerContainerPC != null) {
 				hammer = hammerContainerPC.GetComponent<Hammer> ();
 			}
+			VRSettings.enabled = false;
 			VRPN.SetActive (false);
-            hammerContainerVR.SetActive(false);
-			hammerContainerPC.SetActive(true);
-            cameraVR.SetActive(false);
-            cameraPC.SetActive(true);
+			hammerContainerVR.SetActive (false);
+			hammerContainerPC.SetActive (true);
+			cameraVR.SetActive (false);
+			cameraPC.SetActive (true);
+
             break;
 		case Group.VR:
-			if(hammerContainerVR!=null){
+			if (hammerContainerVR != null) {
 				hammer = hammerContainerVR.GetComponent<Hammer> ();
 			}
+			VRSettings.enabled = true;
 			VRPN.SetActive (true);
-            hammerContainerPC.SetActive(false);
-			hammerContainerVR.SetActive(true);
-            cameraPC.SetActive(false);
-            cameraVR.SetActive(true);
+			hammerContainerPC.SetActive (false);
+			hammerContainerVR.SetActive (true);
+			cameraPC.SetActive (false);
+			cameraVR.SetActive (true);
             break;
 		}
 
@@ -99,6 +107,7 @@ public class Manager : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		OVRInput.Update();
 
 		//Quit application when pressed Q
 		if (Input.GetKeyDown(KeyCode.Q)){
@@ -108,7 +117,7 @@ public class Manager : MonoBehaviour {
 		/*
 			react to user input via space key to toggle conditions or hide messages
 		*/
-		if (spaceEnabled && Input.GetKeyDown(KeyCode.Space)) {
+		if (spaceEnabled && Input.GetKeyDown(KeyCode.Space) || (OVRInput.GetDown(OVRInput.Button.One) && startArea.free)) {
 			logger.logUserEntry ("Space");
 
 			/*
@@ -169,8 +178,16 @@ public class Manager : MonoBehaviour {
 			resetCounter ();
 			initHammer ();
 			viewManager.hideAllMessages ();
-			viewManager.setInfoText ("Please move the hammer to get in touch with controls. The experiment can be aborted at any time by pressing 'q' or telling the Assistant.\n\n");
-			viewManager.setSubText ("Press <Space> to start");
+			switch (group) {
+			case Group.PC:
+				viewManager.setInfoText ("Please move the hammer to get in touch with controls. The experiment can be aborted at any time by pressing 'q' or telling the Assistant.\n");
+				viewManager.setSubText ("Press <Space> to start");
+				break;
+			case Group.VR:
+				viewManager.setInfoText ("Please calibrate thy controls, and the head-mounted-display. The experiment can be aborted at any time by telling the Assistant.\n");
+				viewManager.setSubText ("Press central button to start training");				
+				break;
+			}
 			conditionChangable = false;
 			break;
 		case Condition.TRAINING:
@@ -178,7 +195,15 @@ public class Manager : MonoBehaviour {
 			initHammer ();
 			viewManager.hideAllMessages ();
 			viewManager.setInfoText ("Please move the ball into the box by hitting near the ball.");
-			viewManager.setSubText ("Press <Space> to begin");
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Press <Space> to begin");
+				break;
+			case Group.VR:
+				startArea.gameObject.SetActive(true);
+				viewManager.setSubText ("Press central button to begin");				
+				break;
+			}
 			activateRandomBox ();
 			activateAnimal (0);
 			conditionChangable = false;
@@ -189,8 +214,15 @@ public class Manager : MonoBehaviour {
 			initHammer ();
 			viewManager.hideAllMessages ();
 			viewManager.setInfoText ("Please move the spider into the box.");
-			viewManager.setSubText ("Press <Space> to begin");
-			activateRandomBox ();
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Press <Space> to begin");
+				break;
+			case Group.VR:
+				startArea.gameObject.SetActive(true);				
+				viewManager.setSubText ("Press central button to begin");				
+				break;
+			}			activateRandomBox ();
 			activateAnimal (1);
 			conditionChangable = false;
 			break;
@@ -199,8 +231,15 @@ public class Manager : MonoBehaviour {
 			initHammer ();
 			viewManager.hideAllMessages ();
 			viewManager.setInfoText ("Please kill the spider.");
-			viewManager.setSubText ("Press <Space> to begin");
-			deactivateBoxes ();
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Press <Space> to begin");
+				break;
+			case Group.VR:
+				startArea.gameObject.SetActive(true);				
+				viewManager.setSubText ("Press central button to begin");				
+				break;
+			}			deactivateBoxes ();
 			activateAnimal (1);
 			conditionChangable = false;
 			break;
@@ -210,8 +249,15 @@ public class Manager : MonoBehaviour {
 			initHammer ();
 			viewManager.hideAllMessages ();
 			viewManager.setInfoText ("Please move the gecko into the box.");
-			viewManager.setSubText ("Press <Space> to begin");
-			activateRandomBox ();
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Press <Space> to begin");
+				break;
+			case Group.VR:
+				startArea.gameObject.SetActive(true);				
+				viewManager.setSubText ("Press central button to begin");				
+				break;
+			}			activateRandomBox ();
 			activateAnimal (2);
 			conditionChangable = false;
 			break;
@@ -220,8 +266,15 @@ public class Manager : MonoBehaviour {
 			initHammer ();
 			viewManager.hideAllMessages ();
 			viewManager.setInfoText ("Please kill the gecko.");
-			viewManager.setSubText ("Press <Space> to begin");
-			deactivateBoxes ();
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Press <Space> to begin");
+				break;
+			case Group.VR:
+				startArea.gameObject.SetActive(true);				
+				viewManager.setSubText ("Press central button to begin");				
+				break;
+			}			deactivateBoxes ();
 			activateAnimal (2);
 			conditionChangable = false;
 			break;
@@ -231,8 +284,15 @@ public class Manager : MonoBehaviour {
 			initHammer ();
 			viewManager.hideAllMessages ();
 			viewManager.setInfoText ("Please move the cat into the box.");
-			viewManager.setSubText ("Press <Space> to begin");
-			activateRandomBox ();
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Press <Space> to begin");
+				break;
+			case Group.VR:
+				startArea.gameObject.SetActive(true);				
+				viewManager.setSubText ("Press central button to begin");				
+				break;
+			}			activateRandomBox ();
 			activateAnimal (3);
 			conditionChangable = false;
 			break;
@@ -241,7 +301,15 @@ public class Manager : MonoBehaviour {
 			initHammer ();
 			viewManager.hideAllMessages ();
 			viewManager.setInfoText ("Please kill the cat.");
-			viewManager.setSubText ("Press <Space> to begin");
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Press <Space> to begin");
+				break;
+			case Group.VR:
+				startArea.gameObject.SetActive(true);				
+				viewManager.setSubText ("Press central button to begin");				
+				break;
+			}
 			deactivateBoxes ();
 			activateAnimal (3);
 			conditionChangable = false;
@@ -252,7 +320,16 @@ public class Manager : MonoBehaviour {
 			destroyAnimal ();
 			activateAllAnimals ();
 			logger.appendSummary ();
-			viewManager.setSubText ("Thank you for participating. Press <Space>");
+			viewManager.setHits (hitstotal);
+			viewManager.setPoints (pointstotal);
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Thank you for participating. Press <Space>");
+				break;
+			case Group.VR:
+				viewManager.setSubText ("Thank you for participating. Press central button.");		
+				break;
+			}
 			conditionChangable = false;
 			break;
 		}
@@ -262,30 +339,69 @@ public class Manager : MonoBehaviour {
 		switch(condition){
 		case Condition.INIT:
 			viewManager.hideInfoText ();
-			viewManager.setSubText ("Press <Space> to begin training round");
-			conditionLoopCount = conditonLoops;
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Press <Space> to begin training round");
+				break;
+			case Group.VR:
+				viewManager.setInfoText ("Please move the hammer to get in touch with controls. You can hit by moving it up and down. There will be shown hitpoints.\n");
+				viewManager.setSubText ("Press central button to begin training round");				
+				break;
+			}			conditionLoopCount = conditonLoops;
 			conditionChangable = true;
 			break;
 		case Condition.TRAINING:
 			viewManager.hideInfoText ();
-			viewManager.setSubText ("Press <Space> to end training round and begin experiment");
+			switch (group) {
+			case Group.PC:
+				viewManager.setSubText ("Press <Space> to end training round and begin experiment");
+				break;
+			case Group.VR:
+				startArea.gameObject.SetActive(false);
+				viewManager.setSubText ("Press central button to end training round and begin experiment");
+				break;
+			}
 			conditionLoopCount = conditonLoops;
 			conditionChangable = true;
 			break;
 		case Condition.CONDITION_INSECT:
 		case Condition.CONDITION_INSECT_DEATH:
 		case Condition.CONDITION_INSECT_KILL:
-			viewManager.hideAllMessages();
+			startArea.gameObject.SetActive(false);
+			switch (group) {
+			case Group.PC:
+				viewManager.hideAllMessages();
+				break;
+			case Group.VR:
+				viewManager.hideAllMessages();
+				break;
+			}
 			break;
 		case Condition.CONDITION_REPTILE:
 		case Condition.CONDITION_REPTILE_DEATH:
 		case Condition.CONDITION_REPTILE_KILL:
-			viewManager.hideAllMessages();
+			startArea.gameObject.SetActive(false);
+			switch (group) {
+			case Group.PC:
+				viewManager.hideAllMessages();
+				break;
+			case Group.VR:
+				viewManager.hideAllMessages();
+				break;
+			}
 			break;
 		case Condition.CONDITION_MAMMAL:
 		case Condition.CONDITION_MAMMAL_DEATH:
 		case Condition.CONDITION_MAMMAL_KILL:
-			viewManager.hideAllMessages();
+			startArea.gameObject.SetActive(false);
+			switch (group) {
+			case Group.PC:
+				viewManager.hideAllMessages();
+				break;
+			case Group.VR:
+				viewManager.hideAllMessages();
+				break;
+			}
 			break;
 		case Condition.FINAL:
 			Application.Quit();
@@ -313,6 +429,7 @@ public class Manager : MonoBehaviour {
 
 	private void addHit(Vector3 target){
 		hits++;
+		hitstotal++;
 		if (activeAnimal) {
 			logger.logHit (condition,conditonLoops,conditionLoopCount,target,activeAnimal.transform.position,hits);
 		} else {
@@ -373,6 +490,7 @@ public class Manager : MonoBehaviour {
 			return;
 		viewManager.setGoalPoints (add); 
 		points += add;
+		pointstotal += add;
 		viewManager.setPoints(points);
 		logger.logGoalPoints (add, points);
 	}
@@ -382,6 +500,7 @@ public class Manager : MonoBehaviour {
 			return;
 		viewManager.setHitPoints (add); 
 		points += add;
+		pointstotal += add;
 		viewManager.setPoints (points);
 		logger.logHitPoints (add, points);
 	}
@@ -453,6 +572,8 @@ public class Manager : MonoBehaviour {
 	}
 
 	public void hitAnimal(){
+		if (group == Group.VR && !startArea.free)
+			return;
 		switch(condition){
 		case Condition.TRAINING:
 			break;
@@ -464,7 +585,14 @@ public class Manager : MonoBehaviour {
 			addHitPoints (-30);
 			pointsCollectible = false;
 			logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Disappear");
-			showBothTextInSeconds(2,"Congratulations.","Press <Space> for next round");
+			switch (group) {
+			case Group.PC:
+				showBothTextInSeconds(2,"Congratulations.","Press <Space> for next round");
+				break;
+			case Group.VR:
+				showBothTextInSeconds(2,"Congratulations.","Press central button for next round");
+				break;
+			}
 			conditionChangable = true;
 			break;
 		case Condition.CONDITION_REPTILE_DEATH:
@@ -477,7 +605,14 @@ public class Manager : MonoBehaviour {
 			addHitPoints(-30);
 			pointsCollectible = false;
 			logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Kill");
-			showBothTextInSeconds(2,"Congratulations.","Press <Space> for next round");
+			switch (group) {
+			case Group.PC:
+				showBothTextInSeconds(2,"Congratulations.","Press <Space> for next round");
+				break;
+			case Group.VR:
+				showBothTextInSeconds(2,"Congratulations.","Press central button for next round");
+				break;
+			}
 			conditionChangable = true;
 			break;
 		case Condition.CONDITION_REPTILE_KILL:
@@ -489,7 +624,14 @@ public class Manager : MonoBehaviour {
 			freezeHammer();
 			addGoalPoints (50);
 			logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Kill");
-			showBothTextInSeconds(2,"Congratulations. You killed the Animal.","Press <Space> for next round");
+			switch (group) {
+			case Group.PC:
+				showBothTextInSeconds(2,"Congratulations. You killed the Animal.","Press <Space> for next round");
+				break;
+			case Group.VR:
+				showBothTextInSeconds(2,"Congratulations. You killed the Animal.","Press central button for next round");
+				break;
+			}
 			conditionChangable = true;
 			break;
 		}
@@ -527,6 +669,8 @@ public class Manager : MonoBehaviour {
 
 	public void hitSomething(GameObject other){
 
+		Debug.Log ("Hit " + other.name);
+
 		if (other.name == "Kopf")
 			hitAnimal ();
 		switch(condition){
@@ -542,7 +686,14 @@ public class Manager : MonoBehaviour {
 				resetConditionInSeconds (2);
 				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Floor");
 				viewManager.setInfoText ("It fell off the Table. Please move the ball into the boxes.");
-				viewManager.setSubText ("Press <Space> to play again");
+				switch (group) {
+				case Group.PC:
+					viewManager.setSubText ("Press <Space> to play again");
+					break;
+				case Group.VR:
+					viewManager.setSubText ("Press central button to play again");
+					break;
+				}
 				conditionChangable = false;
 			}
 			break;
@@ -556,7 +707,14 @@ public class Manager : MonoBehaviour {
 				addGoalPoints (30);
 				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Box");
 				viewManager.setInfoText ("Congratulations. It entered the box.");
-				viewManager.setSubText ("Press <Space> for next round");
+				switch (group) {
+				case Group.PC:
+					viewManager.setSubText ("Press <Space> for next round");
+					break;
+				case Group.VR:
+					viewManager.setSubText ("Press central button for next round");
+					break;
+				}
 				conditionChangable = true;
 
 			}
@@ -566,7 +724,14 @@ public class Manager : MonoBehaviour {
 				Destroy (activeAnimal);
 				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Floor");
 				viewManager.setInfoText ("It fell off the Table.");
-				viewManager.setSubText ("Press <Space> for next round");
+				switch (group) {
+				case Group.PC:
+					viewManager.setSubText ("Press <Space> for next round");
+					break;
+				case Group.VR:
+					viewManager.setSubText ("Press central button for next round");
+					break;
+				}
 				conditionChangable = true;
 			}
 			break;
@@ -578,7 +743,14 @@ public class Manager : MonoBehaviour {
 				Destroy (activeAnimal);
 				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Floor");
 				viewManager.setInfoText ("Congratulations.");
-				viewManager.setSubText ("Press <Space> for next round");
+				switch (group) {
+				case Group.PC:
+					viewManager.setSubText ("Press <Space> for next round");
+					break;
+				case Group.VR:
+					viewManager.setSubText ("Press central button for next round");
+					break;
+				}
 				conditionChangable = true;
 			}
 			break;

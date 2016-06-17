@@ -8,6 +8,10 @@ public class ViewManager : MonoBehaviour {
 	public Text pointText;
 	public Text hitText;
 	public GameObject canvas;
+	public GameObject canvasVR;
+	public GameObject canvasVRHammer;
+	public Camera cameraVR;
+	public GameObject UIElements;
 	public GameObject hitPointTextPrefab;
 	public GameObject infoCanvas;
 	public GameObject subCanvas;
@@ -17,6 +21,7 @@ public class ViewManager : MonoBehaviour {
 	public Color goalPointsColor;
 	private bool hitPointAnimation;
 	private System.EventHandler handler;
+	private Manager.Group group;
 
 	// Use this for initialization
 	void Start () {
@@ -28,7 +33,27 @@ public class ViewManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		/*
+		  if(OVRInput.GetDown(OVRInput.Button.DpadUp))
+			setHitPoints (10, hitPointsColor,1);
+		*/
+	}
 
+	public void mode(Manager.Group group){
+		this.group = group;
+		switch(group){
+		case Manager.Group.PC:
+			UIElements.transform.SetParent (canvas.transform);
+			canvasVR.transform.localScale = Vector3.one;
+			break;
+		case Manager.Group.VR:
+			UIElements.transform.SetParent (canvasVR.transform);
+			canvasVR.transform.localScale = Vector3.one * 0.004f;
+			canvasVRHammer.GetComponent<Canvas> ().worldCamera = cameraVR;
+			canvasVRHammer.transform.localScale = Vector3.one * 0.05f;
+
+			break;
+		}	
 	}
 
 	public 	bool activeMessageBox(){
@@ -44,6 +69,11 @@ public class ViewManager : MonoBehaviour {
 	public void hideInfoText(){
 		hideCanvas(infoCanvas);
 	}
+
+	public void hideSubText(){
+		hideCanvas(subCanvas);
+	}
+
 
 	public void showTotalPoints()
 	{
@@ -77,8 +107,16 @@ public class ViewManager : MonoBehaviour {
 
 	public void setHitPoints(int value)
 	{
-		setHitPoints (value, hitPointsColor,2);
+		switch (group) {
+		case Manager.Group.PC:
+			setHitPoints (value, hitPointsColor, 2);
+			break;
+		case Manager.Group.VR:
+			setHitPoints (value, hitPointsColor, 1);
+			break;
+		}
 	}
+
 	public void setHitPoints(int value, Color color, int speed)
 	{
 		GameObject hitPoint = Instantiate (hitPointTextPrefab);
@@ -89,7 +127,19 @@ public class ViewManager : MonoBehaviour {
 		if (value < 0)
 			prefix = "";
 		points.text = prefix + value.ToString ();
-		hitPoint.transform.SetParent (canvas.transform);
+		switch(group){
+		case Manager.Group.PC:
+			hitPoint.transform.SetParent (canvas.transform);
+			hitPoint.transform.localPosition =  new Vector3(100,50,0);
+			break;
+		case Manager.Group.VR:
+			hitPoint.transform.SetParent (canvasVRHammer.transform);
+			hitPoint.transform.localPosition = Vector3.zero;
+			hitPoint.transform.localRotation = Quaternion.Euler (Vector3.zero);
+			hitPoint.transform.localScale = Vector3.one;
+
+			break;
+		}	
 		hitPoint.SetActive (true);
 	}
 		

@@ -23,6 +23,7 @@ public class Hammer : MonoBehaviour {
 	private float offsetY;
 	Vector3 initPosition;
 	Quaternion initRotation;
+	bool init;
 
 	private Animator anim;
 	public float yBase;
@@ -46,18 +47,8 @@ public class Hammer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (manager.activeMessageBox ())
-			return;
-		
-		movement ();
-
-		if (calibrated && (yDistanceToTable > yDistanceToTableForNoHit))
-			hitEnabled = true;
-		
-		hitObject();
-		yDistanceToTable = Mathf.Abs (hammer.transform.position.y - yBase);
 		//Calibrate Hammer to table
-		if (Input.GetKeyDown ("c")) {
+		if (Input.GetKeyDown ("c") ||OVRInput.GetDown(OVRInput.Button.Two)) {
 			yBase = hammer.transform.position.y;
 			RaycastHit hitPoint;
 			if (Physics.Raycast (hammer.transform.position, -Vector3.up, out hitPoint, 20)) {
@@ -68,6 +59,18 @@ public class Hammer : MonoBehaviour {
 				calibrated = true;
 			}
 		}
+
+		if (manager.activeMessageBox ())
+			return;
+		
+		movement ();
+
+		if (calibrated && (yDistanceToTable > yDistanceToTableForNoHit))
+			hitEnabled = true;
+		
+		hitObject();
+		yDistanceToTable = Mathf.Abs (hammer.transform.position.y - yBase);
+
 		
 		switch (hammerAnim.move) {
 		case 4:
@@ -106,7 +109,7 @@ public class Hammer : MonoBehaviour {
 
 	public void activate(){
 		hammer.SetActive (true);
-		hitEnabled = true;
+		hitEnabled = false;
 		freezed = false;
 	}
 
@@ -126,6 +129,7 @@ public class Hammer : MonoBehaviour {
 		{
 			RaycastHit hitPoint;
 			if (Physics.Raycast (kopf.transform.position, -Vector3.up, out hitPoint, 20)) {
+				
 				//Only hits that hit the table area are valid
 				if (hitPoint.collider.gameObject.Equals (tisch)) {
 					target = hitPoint.point;

@@ -10,7 +10,7 @@ public class oculusReset : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	if(Input.GetKey ("r")){
+		if(Input.GetKey ("r") || OVRInput.GetDown(OVRInput.Button.DpadDown)){
 			UnityEngine.VR.InputTracking.Recenter ();
 	}
 	}

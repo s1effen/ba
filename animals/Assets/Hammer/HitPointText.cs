@@ -12,7 +12,6 @@ public class HitPointText : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		hitPointText = GetComponent<Text> ();
-		transform.localPosition =  new Vector3(100,50,0);
 	}
 	
 	// Update is called once per frame
