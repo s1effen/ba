@@ -16,12 +16,15 @@ public class ViewManager : MonoBehaviour {
 	public GameObject infoCanvas;
 	public GameObject subCanvas;
 	public GameObject inputCanvas;
+	public Color textColor;
+	public Color warningColor;
 	public Color hitsColor;
 	public Color hitPointsColor;
 	public Color goalPointsColor;
 	private bool hitPointAnimation;
 	private System.EventHandler handler;
 	private Manager.Group group;
+	private string subText = "";
 
 	// Use this for initialization
 	void Start () {
@@ -151,6 +154,24 @@ public class ViewManager : MonoBehaviour {
 	}
 
 	public void setSubText(string text){
+		subText = text;
+		setColor (subCanvas, textColor);
+		if (!subCanvas.activeSelf)
+			subCanvas.SetActive (true);
+		setText (subCanvas, text);
+	}
+
+	public void resetSubText(){
+		if (subText == "")
+			return;
+		setColor (subCanvas, textColor);
+		if (!subCanvas.activeSelf)
+			subCanvas.SetActive (true);
+		setText (subCanvas, subText);
+	}
+
+	public void setSubWarning(string text){
+		setColor (subCanvas, warningColor);
 		if (!subCanvas.activeSelf)
 			subCanvas.SetActive (true);
 		setText (subCanvas, text);
@@ -181,6 +202,12 @@ public class ViewManager : MonoBehaviour {
 	void hideCanvas(GameObject canvas){
 		canvas.SetActive(false);
 	}
+
+	void setColor(GameObject panel, Color color){
+		Text textField = panel.GetComponentInChildren<Text> ();
+		textField.color = color;
+	}
+
 	void setText(GameObject panel, string text){
 		Text textField = panel.GetComponentInChildren<Text> ();
 		if (textField == null)

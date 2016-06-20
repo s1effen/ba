@@ -5,7 +5,7 @@ using System.IO;
 
 public static class Persistent {
 
-	public static void init(){
+	static void init(){
 		if(!File.Exists("persistent.xml")){
 			XDocument xdoc = new XDocument (
 				new XComment("Used to store Unity values permanently from play mode."),
@@ -16,6 +16,9 @@ public static class Persistent {
 	}
 
 	public static object getValue(string key){
+		if (!File.Exists ("persistent.xml")) {
+			init ();
+		}
 		XDocument xdoc = XDocument.Load ("persistent.xml");
 		if(!checkValue (xdoc, key))
 			return null;
@@ -71,7 +74,7 @@ public static class Persistent {
 	}
 
 	public static void setValue(string key, Vector3 value){
-		setValue (key, value.ToString (), "Vector3");
+		setValue (key, "(" + value.x.ToString () + "," +  value.y.ToString () + "," +  value.z.ToString () + ")", "Vector3");
 	}
 
 	public static void setValue(string key, Quaternion value){
@@ -79,6 +82,9 @@ public static class Persistent {
 	}
 
 	public static void setValue(string key, string value, string type){
+		if (!File.Exists ("persistent.xml")) {
+			init ();
+		}
 		XDocument xdoc = XDocument.Load ("persistent.xml");
 		if (checkValue (xdoc, key)) {
 			//Change entry

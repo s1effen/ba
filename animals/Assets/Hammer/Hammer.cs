@@ -15,7 +15,7 @@ public class Hammer : MonoBehaviour {
 	public float yDistanceToTable;
 	public bool hit = false;
 	public bool hitEnabled = false;
-	private bool freezed = false;
+	public bool freezed = false;
 	private Manager manager;
 	private bool calibrated = false;
 	private Vector3 target;
@@ -34,11 +34,25 @@ public class Hammer : MonoBehaviour {
 		initRotation = transform.rotation;
 		manager = GameObject.Find ("GameManager").GetComponent<Manager> ();
 		Renderer kopfRend = hammer.transform.FindChild ("Kopf").GetComponent<Renderer>();
+
 		offsetY = kopfRend.bounds.size.y / 2;
 		baseHeight = transform.position.y;
+
 		anim = hammer.GetComponent<Animator> ();
 		if (!mouseControl) {
-			yBase = hammer.transform.position.y;
+		object temp = Persistent.getValue ("Hammer-PosLoc");
+			if (temp != null) {
+				calibrated = true;
+				hammer.transform.localPosition = (Vector3)temp;
+				temp = Persistent.getValue ("Hammer-yBase");
+				if (temp != null) {
+					yBase = (float) temp;
+					calibrated = true;
+				}
+
+			} else {
+				yBase = hammer.transform.position.y;
+			}
 			hitEnabled = false;
 		} else {
 			hitEnabled = true;
@@ -48,21 +62,21 @@ public class Hammer : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		//Calibrate Hammer to table
-		if (Input.GetKeyDown ("c") ||OVRInput.GetDown(OVRInput.Button.Two)) {
+		if ((Input.GetKeyDown ("c") ||OVRInput.GetDown(OVRInput.Button.Two)) && manager.condition == Manager.Condition.INIT) {
 			yBase = hammer.transform.position.y;
 			RaycastHit hitPoint;
-			if (Physics.Raycast (hammer.transform.position, -Vector3.up, out hitPoint, 20)) {
+			if (Physics.Raycast (hammer.transform.position + Vector3.up * 5.0f, -Vector3.up, out hitPoint, 20)) {
 				Debug.Log ("Hammer calibrated to " + (hitPoint.point.y + offsetY));
 				hammer.transform.position = new Vector3(hammer.transform.position.x,hitPoint.point.y + offsetY,hammer.transform.position.z);
 				yBase = hitPoint.point.y + offsetY;
 				yDistanceToTable = Mathf.Abs (hammer.transform.position.y - yBase);
 				calibrated = true;
+				Persistent.setValue ("Hammer-PosLoc", hammer.transform.localPosition);
+				Persistent.setValue ("Hammer-yBase", yBase);
+
 			}
 		}
 
-		if (manager.activeMessageBox ())
-			return;
-		
 		movement ();
 
 		if (calibrated && (yDistanceToTable > yDistanceToTableForNoHit))
@@ -102,6 +116,11 @@ public class Hammer : MonoBehaviour {
 		freezed = true;
 	}
 
+	public void unfreeze(){
+		hitEnabled = true;
+		freezed = false;
+	}
+
 	public void deactivate (){
 		hammer.SetActive (false);
 		hitEnabled = false;
@@ -115,8 +134,10 @@ public class Hammer : MonoBehaviour {
 
 	public Vector3 reset(){
 		activate ();
-		transform.position = initPosition;
-		transform.rotation = initRotation;
+		if (mouseControl) {
+			transform.position = initPosition;
+			transform.rotation = initRotation;
+		}
 		return initPosition;
 	}
 
@@ -156,6 +177,8 @@ public class Hammer : MonoBehaviour {
 
 	void movement()
 	{
+		if (manager.activeMessageBox ())
+			return;
 		if (!mouseControl)
 			return;
 		

@@ -2,35 +2,11 @@
 <!--Used to store Unity values permanently from play mode.-->
 <Persistent>
   <Entry>
-    <key>Cube 2</key>
-    <value type="Vector3">(-1.0, -1.0, 0.0)</value>
+    <key>Hammer-PosLoc</key>
+    <value type="Vector3">(0,-0.3183328,0)</value>
   </Entry>
   <Entry>
-    <key>Cube 1</key>
-    <value type="Vector3">(1.0, 1.0, 0.0)</value>
-  </Entry>
-  <Entry>
-    <key>Cube 1-position</key>
-    <value type="Vector3">(1.0, 1.0, 0.0)</value>
-  </Entry>
-  <Entry>
-    <key>Cube 1-rotation</key>
-    <value type="Quaternion">(0.0, 0.0, 0.0, 1.0)</value>
-  </Entry>
-  <Entry>
-    <key>Cube 1-bool</key>
-    <value type="bool">True</value>
-  </Entry>
-  <Entry>
-    <key>Cube 1-int</key>
-    <value type="int">256</value>
-  </Entry>
-  <Entry>
-    <key>Cube 1-float</key>
-    <value type="float">0.23</value>
-  </Entry>
-  <Entry>
-    <key>Cube 1-string</key>
-    <value type="string">joooo</value>
+    <key>Hammer-yBase</key>
+    <value type="float">0.175526</value>
   </Entry>
 </Persistent>
