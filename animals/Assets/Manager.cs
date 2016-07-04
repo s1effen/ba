@@ -621,11 +621,11 @@ public class Manager : MonoBehaviour {
 		case Condition.CONDITION_MAMMAL_DEATH:
 			if (dead)
 				return;
+			logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Kill");
 			killAnimal ();
 			freezeHammer ();
 			addHitPoints(-30);
 			pointsCollectible = false;
-			logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Kill");
 			switch (group) {
 			case Group.PC:
 				showBothTextInSeconds(2,"Congratulations.","Press <Space> for next round");
@@ -702,7 +702,7 @@ public class Manager : MonoBehaviour {
 				addGoalPoints (30);
 				logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Box");
 				viewManager.setInfoText ("Congratulations. It entered the box.");
-				activeAnimal.GetComponent<Rigidbody>().useGravity = false;
+				//activeAnimal.GetComponent<Rigidbody>().useGravity = false;
 			}
 
 			if (other.name == "Floor" || other.name == "outside") {
