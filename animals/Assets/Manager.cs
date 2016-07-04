@@ -603,7 +603,7 @@ public class Manager : MonoBehaviour {
 		case Condition.CONDITION_MAMMAL:
 			destroyAnimal ();
 			freezeHammer ();
-			addHitPoints (-30);
+			//addHitPoints (-30);
 			pointsCollectible = false;
 			logger.logEnteredGoal (condition,conditonLoops,conditionLoopCount,"Disappear");
 			switch (group) {
@@ -674,9 +674,12 @@ public class Manager : MonoBehaviour {
 		case Condition.CONDITION_MAMMAL_DEATH:
 		case Condition.CONDITION_MAMMAL_KILL:
 			BoxCollider bc = activeAnimal.GetComponent<BoxCollider> ();
-			bc.center -= new Vector3 (0, 0.02f, 0);
-			bc.size -= new Vector3 (0, 0.12f, 0);
-			break;
+            //bc.center -= new Vector3 (0, 0.02f, 0);
+			//bc.size -= new Vector3 (0, 0.12f, 0);
+            bc.enabled = true;
+            MeshCollider mc = activeAnimal.GetComponent<MeshCollider>();
+            mc.enabled = false;
+            break;
 		}
 		if (bloodActive) {
 			GameObject blood  = GameObject.Instantiate (blood_prefab);

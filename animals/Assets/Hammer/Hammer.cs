@@ -117,7 +117,7 @@ public class Hammer : MonoBehaviour {
 	}
 
 	public void unfreeze(){
-		hitEnabled = true;
+		//hitEnabled = true;
 		freezed = false;
 	}
 
