@@ -85,7 +85,7 @@ public class Manager : MonoBehaviour {
 			hammerContainerPC.SetActive (true);
 			cameraVR.SetActive (false);
 			cameraPC.SetActive (true);
-
+			Cursor.visible = true;
             break;
 		case Group.VR:
 			if (hammerContainerVR != null) {
@@ -181,6 +181,7 @@ public class Manager : MonoBehaviour {
 			case Group.PC:
 				viewManager.setInfoText ("Please move the hammer to get in touch with controls. The experiment can be aborted at any time by pressing 'q' or telling the Assistant.\n");
 				viewManager.setSubText ("Press <Space> to start");
+				Cursor.visible = false;
 				break;
 			case Group.VR:
 				viewManager.setInfoText ("Please check the controls, and the head-mounted-display. The Assistant can help you calibrating the scene. The experiment can be aborted at any time by telling the Assistant.\n");
